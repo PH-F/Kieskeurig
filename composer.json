@@ -1,0 +1,16 @@
+{
+    "name": "Phf/Kieskeurig",
+    "authors": [
+        {
+            "name": "Patrick Houtman",
+            "email": "github@ph-f.nl"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/",
+            "Phf\\Kieskeurig\\": "src"
+        }
+    }
+}
