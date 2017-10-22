@@ -17,10 +17,10 @@ class KieskeurigManager
         "ids" => "/nl/product.nsf/wsproductprices"
     ];
 
-    public function __construct($token, $affId)
+    public function __construct($params)
     {
-        $this->token = $token;
-        $this->affid = $affId;
+        $this->token = $params->apiToken;
+        $this->affid = $params->apiAffid;
     }
 
     public function connect($function, $param)
