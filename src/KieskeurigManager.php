@@ -80,7 +80,7 @@ class KieskeurigManager
 
                 if(array_key_exists("specification", $product)) {
                     foreach ($product['specification'] as $s) {
-                        $specifications .= $s['label'] . ":" . (substr($s['value'], 0, 4) == "http" ? "<img src='" . $s['value'] . "'>" : $s['value']) . "<br>";
+                        $specifications .= $s['label'] . ":" . (substr($s['value'], 0, 4) == "http" ? " <img src='" . $s['value'] . "'>" : $s['value']) . "<br>";
                     }
                 }
 
