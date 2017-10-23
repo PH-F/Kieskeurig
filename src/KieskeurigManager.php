@@ -110,8 +110,8 @@ class KieskeurigManager
                     "ean" => $product['ean'],
                     "specifications" => $specifications,
                     "category" => $productcode,
-                    "price-range" => $price,
-                    "price-count" => $productcount,
+                    "price_range" => $price,
+                    "price_count" => $productcount,
                 ];
             }
 
