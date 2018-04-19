@@ -76,13 +76,7 @@ class KieskeurigManager
             $productList = [];
             $products = ($data['resultset']['searchresult']['items']['product']);
             foreach ($products as $product) {
-                $specifications = "";
-
-                if(array_key_exists("specification", $product)) {
-                    foreach ($product['specification'] as $s) {
-                        $specifications .= $s['label'] . ":" . (substr($s['value'], 0, 4) == "http" ? " <img src='" . $s['value'] . "'>" : $s['value']) . "<br>";
-                    }
-                }
+                $specifications = $this->getProductSpecifications($product['specification'] ?? []);
 
                 $extra = array_key_exists("type_extra", $product) ? $product['type_extra'] : "";
                 $extra = is_array($extra) ? implode(",", $extra) : $extra;
@@ -228,5 +222,39 @@ class KieskeurigManager
             $xml->getName() => $propertiesArray
         );
     }
+    
+    /**
+     * Get a html list of product specifications.
+     *
+     * @param array $specifications
+     * @return string
+     */
+    protected function getProductSpecifications($specifications = [])
+    {
+        if (array_has($specifications, 'label')) {
+            $specifications = [$specifications];
+        }
 
+        return collect($specifications)
+            ->map(function ($specification) {
+                return ($specification['label'] ?? '') . ":" . $this->getProductSpecificationValue($specification['value'] ?? '') . '<br/>';
+            })
+            ->implode('');
+
+    }
+
+    /**
+     * Get the value of the product specification.
+     *
+     * @param string $value
+     * @return string
+     */
+    protected function getProductSpecificationValue($value)
+    {
+        if (starts_with($value, 'http')) {
+            return '<img src="' . $value . '">';
+        }
+
+        return $value;
+    }
 }
