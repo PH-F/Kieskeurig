@@ -74,7 +74,7 @@ class KieskeurigManager
             $data = ($this->xmlToArray($return));
 
             $productList = [];
-            $products = ($data['resultset']['searchresult']['items']['product']);
+            $products = array_get($data, 'resultset.searchresult.items.product', []);
             foreach ($products as $product) {
                 $specifications = $this->getProductSpecifications($product['specification'] ?? []);
 
