@@ -66,11 +66,11 @@ class KieskeurigManager
             ]
         );
 
-        if($output == "xml") {
+        if ($output == "xml") {
             return $return;
         }
 
-        if($output == "array") {
+        if ($output == "array") {
             $data = ($this->xmlToArray($return));
 
             $productList = [];
@@ -81,26 +81,26 @@ class KieskeurigManager
                 $extra = array_key_exists("type_extra", $product) ? $product['type_extra'] : "";
                 $extra = is_array($extra) ? implode(",", $extra) : $extra;
                 $price = "";
-                if(array_key_exists("prices", $product)) {
-                    if(is_array($product['prices']) && array_key_exists("range", $product['prices'])) {
-                        if(is_array($product['prices']['range']) && array_key_exists("$", $product['prices']['range'])) {
+                if (array_key_exists("prices", $product)) {
+                    if (is_array($product['prices']) && array_key_exists("range", $product['prices'])) {
+                        if (is_array($product['prices']['range']) && array_key_exists("$", $product['prices']['range'])) {
                             $price = $product['prices']['range']["$"];
                         }
                     }
                 }
                 $productcode = "";
-                if(is_array($product['productgroup']) && array_key_exists("productcode", $product['productgroup'])) {
+                if (is_array($product['productgroup']) && array_key_exists("productcode", $product['productgroup'])) {
                     $productcode = $product['productgroup']['productcode'];
                 }
                 $productcount = "";
-                if(is_array($product['prices']) && array_key_exists("count", $product['prices'])) {
+                if (is_array($product['prices']) && array_key_exists("count", $product['prices'])) {
                     $productcount = $product['prices']['count'];
                 }
 
-                $productList[] =  [
+                $productList[] = [
                     "id" => $product['productid'],
                     "brand" => $product['brand'],
-                    "type" => $product['type'] . ($extra == "" ? "" : " (".$extra.")"),
+                    "type" => $product['type'] . ($extra == "" ? "" : " (" . $extra . ")"),
                     "ean" => $product['ean'],
                     "specifications" => $specifications,
                     "category" => $productcode,
@@ -128,25 +128,31 @@ class KieskeurigManager
             $shop->levertijd = "Binnen " . (string)$_shop->DELIVERYTIME;
             $shop->levertijd .= ((int)$_shop->DELIVERYTIME == 1) ? ' werkdag' : ' werkdagen';
             $shop->price = str_replace(',', '', (string)$_shop->PICKUPPRICE);
+            $alt_price = str_replace(',', '', (string)$_shop->PRICE);
             $shop->postage = (string)$_shop->SHOPNAME;
             $shop->producturl = (string)$_shop->SHOPLINK;
             $shop->source = (string)'kieskeurig';
 
             if ($shop->price > 0) {
-                $shops[] = $shop;
+                $shops[(string)$_shop->SHOPID] = $shop;
+            } elseif ($alt_price > 0) {
+                if (!isset($shops[$shop->shop_id]) || (isset($shops[$shop->shop_id]) && $shops[$shop->shop_id]->price > $alt_price)) {
+                    $shop->price = $alt_price;
+                    $shops[(string)$_shop->SHOPID] = $shop;
+                }
             }
+
 
 //                if (!empty($shop->price)) {
 //                    $allPrices[] = $shop->price;
 //                }
         }
 
-        return $shops;
+        return array_values($shops);
     }
 
-
-
-    public function xmlToArray($xml, $options = array()) {
+    public function xmlToArray($xml, $options = array())
+    {
         $defaults = array(
             'namespaceSeparator' => ':',//you may want this to be something other than a colon
             'attributePrefix' => '@',   //to distinguish between attributes and nodes with the same name
@@ -166,8 +172,10 @@ class KieskeurigManager
         foreach ($namespaces as $prefix => $namespace) {
             foreach ($xml->attributes($namespace) as $attributeName => $attribute) {
                 //replace characters in attribute name
-                if ($options['keySearch']) $attributeName =
-                    str_replace($options['keySearch'], $options['keyReplace'], $attributeName);
+                if ($options['keySearch']) {
+                    $attributeName =
+                        str_replace($options['keySearch'], $options['keyReplace'], $attributeName);
+                }
                 $attributeKey = $options['attributePrefix']
                     . ($prefix ? $prefix . $options['namespaceSeparator'] : '')
                     . $attributeName;
@@ -184,10 +192,14 @@ class KieskeurigManager
                 list($childTagName, $childProperties) = each($childArray);
 
                 //replace characters in tag name
-                if ($options['keySearch']) $childTagName =
-                    str_replace($options['keySearch'], $options['keyReplace'], $childTagName);
+                if ($options['keySearch']) {
+                    $childTagName =
+                        str_replace($options['keySearch'], $options['keyReplace'], $childTagName);
+                }
                 //add namespace prefix, if any
-                if ($prefix) $childTagName = $prefix . $options['namespaceSeparator'] . $childTagName;
+                if ($prefix) {
+                    $childTagName = $prefix . $options['namespaceSeparator'] . $childTagName;
+                }
 
                 if (!isset($tagsArray[$childTagName])) {
                     //only entry with this key
@@ -211,7 +223,9 @@ class KieskeurigManager
         //get text content of node
         $textContentArray = array();
         $plainText = trim((string)$xml);
-        if ($plainText !== '') $textContentArray[$options['textContent']] = $plainText;
+        if ($plainText !== '') {
+            $textContentArray[$options['textContent']] = $plainText;
+        }
 
         //stick it all together
         $propertiesArray = !$options['autoText'] || $attributesArray || $tagsArray || ($plainText === '')
@@ -222,7 +236,7 @@ class KieskeurigManager
             $xml->getName() => $propertiesArray
         );
     }
-    
+
     /**
      * Get a html list of product specifications.
      *
